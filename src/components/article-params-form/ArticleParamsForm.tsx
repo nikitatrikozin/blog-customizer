@@ -26,12 +26,12 @@ type ArticleParamsFormProps = {
 };
 
 export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
-	const [isOpen, setIsOpen] = useState(false);
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 	const [formState, setFormState] = useState(defaultArticleState);
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (!isOpen) return;
+		if (!isSidebarOpen) return;
 
 		const handleOutsideClick = (event: MouseEvent) => {
 			const target = event.target;
@@ -41,7 +41,7 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 				containerRef.current &&
 				!containerRef.current.contains(target)
 			) {
-				setIsOpen(false);
+				setIsSidebarOpen(false);
 			}
 		};
 
@@ -50,7 +50,7 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 		return () => {
 			document.removeEventListener('mousedown', handleOutsideClick);
 		};
-	}, [isOpen]);
+	}, [isSidebarOpen]);
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -62,16 +62,27 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 		onApply(defaultArticleState);
 	};
 
+	const createFieldChangeHandler = (key: keyof ArticleStateType) => {
+		return (option: ArticleStateType[typeof key]) => {
+			setFormState((prevState) => ({
+				...prevState,
+				[key]: option,
+			}));
+		};
+	};
+
 	return (
 		<div ref={containerRef}>
 			<ArrowButton
-				isOpen={isOpen}
-				onClick={() => setIsOpen((prevIsOpen) => !prevIsOpen)}
+				isOpen={isSidebarOpen}
+				onClick={() =>
+					setIsSidebarOpen((prevIsSidebarOpen) => !prevIsSidebarOpen)
+				}
 			/>
 
 			<aside
 				className={clsx(styles.container, {
-					[styles.container_open]: isOpen,
+					[styles.container_open]: isSidebarOpen,
 				})}>
 				<form
 					className={styles.form}
@@ -85,12 +96,7 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 						title='Шрифт'
 						options={fontFamilyOptions}
 						selected={formState.fontFamilyOption}
-						onChange={(option) => {
-							setFormState((prevState) => ({
-								...prevState,
-								fontFamilyOption: option,
-							}));
-						}}
+						onChange={createFieldChangeHandler('fontFamilyOption')}
 					/>
 
 					<RadioGroup
@@ -98,24 +104,14 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 						name='fontSize'
 						options={fontSizeOptions}
 						selected={formState.fontSizeOption}
-						onChange={(option) => {
-							setFormState((prevState) => ({
-								...prevState,
-								fontSizeOption: option,
-							}));
-						}}
+						onChange={createFieldChangeHandler('fontSizeOption')}
 					/>
 
 					<Select
 						title='Цвет шрифта'
 						options={fontColors}
 						selected={formState.fontColor}
-						onChange={(option) => {
-							setFormState((prevState) => ({
-								...prevState,
-								fontColor: option,
-							}));
-						}}
+						onChange={createFieldChangeHandler('fontColor')}
 					/>
 
 					<Separator />
@@ -124,24 +120,14 @@ export const ArticleParamsForm = ({ onApply }: ArticleParamsFormProps) => {
 						title='Цвет фона'
 						options={backgroundColors}
 						selected={formState.backgroundColor}
-						onChange={(option) => {
-							setFormState((prevState) => ({
-								...prevState,
-								backgroundColor: option,
-							}));
-						}}
+						onChange={createFieldChangeHandler('backgroundColor')}
 					/>
 
 					<Select
 						title='Ширина контента'
 						options={contentWidthArr}
 						selected={formState.contentWidth}
-						onChange={(option) => {
-							setFormState((prevState) => ({
-								...prevState,
-								contentWidth: option,
-							}));
-						}}
+						onChange={createFieldChangeHandler('contentWidth')}
 					/>
 
 					<div className={styles.bottomContainer}>
